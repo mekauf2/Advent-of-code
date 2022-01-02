@@ -38,9 +38,59 @@
 # Find all of the low points on your heightmap. 
 # What is the sum of the risk levels of all low points on your heightmap?
 
+# --- Part Two ---
+# Next, you need to find the largest basins so you know what areas are most
+# important to avoid.
+
+# A basin is all locations that eventually flow downward to a single low point.
+# Therefore, every low point has a basin, although some basins are very small.
+# Locations of height 9 do not count as being in any basin, and all other
+# locations will always be part of exactly one basin.
+
+# The size of a basin is the number of locations within the basin,
+# including the low point. The example above has four basins.
+
+# The top-left basin, size 3:
+
+# 2199943210
+# 3987894921
+# 9856789892
+# 8767896789
+# 9899965678
+
+# The top-right basin, size 9:
+
+# 2199943210
+# 3987894921
+# 9856789892
+# 8767896789
+# 9899965678
+
+# The middle basin, size 14:
+
+# 2199943210
+# 3987894921
+# 9856789892
+# 8767896789
+# 9899965678
+
+# The bottom-right basin, size 9:
+
+# 2199943210
+# 3987894921
+# 9856789892
+# 8767896789
+# 9899965678
+
+# Find the three largest basins and multiply their sizes together.
+# In the above example, this is 9 * 14 * 9 = 1134.
+
+# What do you get if you multiply together the sizes of the three largest
+# basins?
+
 import numpy as np
 
-with open("Dec9_sample.txt") as f:
+with open("Dec9_data.txt") as f:
     data = f.readlines()
 
 cleaned = []
@@ -63,32 +113,13 @@ def task1(df):
     
     Returns (int): sum of risk levels associated with low points
     """
-    landscape = np.ones(df.shape)
+    landscape = np.zeros(df.shape)
     rows, cols = df.shape
-    for r in range(rows):
-        row = df[r, :]
-        for j, val in enumerate(row):
-            if (j != 0 and val > row[j-1]) or (j != cols - 1 and val > row[j + 1]):
-                landscape[r,j] = 0
-    
-    # print(df)
-    # print(landscape)
-    potential_lows = np.where(landscape == 1)
-    # print(potential_lows[0])
-    for i, x in enumerate(potential_lows[0]):
-        y = potential_lows[1][i]
-        val = df[x,y]
-        # print(x,y,val)
-        if (x != 0 and val > df[x-1, y]) or (x != rows - 1 and val > df[x+1, y]):
-            landscape[x,y] = 0
-
-    # for c in range(cols):
-    #     col = df[:, c]
-    #     print(col)
-    #     for i, val in enumerate(col):
-    #         if (i != 0 and val > col[i-1]) or (i != rows - 1 and val > col[i + 1]):
-    #             landscape[i, c] = 0
-    # print(landscape)
+    for (x,y), val in np.ndenumerate(df):
+        if (x == 0 or val < df[x-1,y]) and (x == rows - 1 or val < df[x+1, y]):
+            if (y == 0 or val < df[x,y-1]) and (
+                y == cols - 1 or val < df[x, y+1]):
+                landscape[x,y] = 1
 
     num_low_points = len(np.where(landscape == 1)[0])
 
